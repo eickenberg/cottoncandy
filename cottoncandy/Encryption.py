@@ -19,7 +19,7 @@ class Encryption(object):
     Abstract base class for a file encrypt/decrypt object
     """
 
-    def __init__(self, key = None, keyfile = None):
+    def __init__(self, key=None, keyfile=None):
         """
 
         Parameters
@@ -53,7 +53,7 @@ class Encryption(object):
         with open(file_name) as file:
             self.key = file.read()
 
-    def store_key(self, file_name = 'key.key'):
+    def store_key(self, file_name='key.key'):
         """
         Stores key to file
 
@@ -75,7 +75,7 @@ class Encryption(object):
         """
         raise NotImplementedError
 
-    def encrypt_file(self, file_name, encrypted_file_name = None):
+    def encrypt_file(self, file_name, encrypted_file_name=None):
         """
         Encrypts a file on disk
 
@@ -108,7 +108,7 @@ class Encryption(object):
         """
         raise NotImplementedError
 
-    def decrypt_file(self, file_name, key = None, decrypted_file_name = None):
+    def decrypt_file(self, file_name, key=None, decrypted_file_name=None):
         """
         Decrypts a file on disk
 
@@ -127,7 +127,7 @@ class Encryption(object):
         """
         raise NotImplementedError
 
-    def decrypt_stream(self, instream, key = None):
+    def decrypt_stream(self, instream, key=None):
         """
         Decrypts a stream in memory
 
@@ -155,7 +155,8 @@ class AESEncryption(Encryption):
     [initialization vector][ binary ciphertext for file  ||   padding with spaces	 ][file size in bytes]
     """
 
-    def __init__(self, key = None, keyfile = None, mode = CIPHER_BLOCK_CHAIN, chunk_size = DEFAULT_CHUNK_SIZE, initialisation_vector_size = INIT_VECT_SIZE):
+    def __init__(self, key=None, keyfile=None, mode=CIPHER_BLOCK_CHAIN,
+				 chunk_size=DEFAULT_CHUNK_SIZE, initialisation_vector_size=INIT_VECT_SIZE):
         """
 
         Parameters
@@ -176,7 +177,7 @@ class AESEncryption(Encryption):
         self.chunk_size = chunk_size
         self.initialisation_vector_size = initialisation_vector_size
 
-    def generate_key(self, key_size = 32):
+    def generate_key(self, key_size=32):
         """
         Generates a new AES key
 
@@ -193,7 +194,7 @@ class AESEncryption(Encryption):
             raise RuntimeError('Bad key length')
         self.key = Random.get_random_bytes(key_size)
 
-    def encrypt_file(self, file_name, encrypted_file_name = None, key = None, chunk_size = None, initialisation_vector_size = None):
+    def encrypt_file(self, file_name, encrypted_file_name=None, key=None, chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -253,7 +254,7 @@ class AESEncryption(Encryption):
                     output_file.write(encryptor.encrypt(this_chunk))
         del encryptor
 
-    def encrypt_stream(self, instream, key = None, chunk_size = None, initialisation_vector_size = None):
+    def encrypt_stream(self, instream, key=None, chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -310,7 +311,7 @@ class AESEncryption(Encryption):
         output_stream.seek(0)
         return output_stream
 
-    def decrypt_file(self, file_name, key = None, decrypted_file_name = None, chunk_size = None, initialisation_vector_size = None):
+    def decrypt_file(self, file_name, key=None, decrypted_file_name=None, chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -362,7 +363,7 @@ class AESEncryption(Encryption):
                 output_file.truncate(original_size)
         del decryptor
 
-    def decrypt_stream(self, instream, key = None, chunk_size = None, initialisation_vector_size = None):
+    def decrypt_stream(self, instream, key=None, chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -419,7 +420,8 @@ class RSAAESEncryption(AESEncryption):
     the RSA private key is needed to decrypt the AES key.
     """
 
-    def __init__(self, key = None, keyfile = None, mode = CIPHER_BLOCK_CHAIN, chunk_size = DEFAULT_CHUNK_SIZE, initialisation_vector_size = INIT_VECT_SIZE, AES_key_length = 32):
+    def __init__(self, key=None, keyfile=None, mode=CIPHER_BLOCK_CHAIN, chunk_size=DEFAULT_CHUNK_SIZE,
+				 initialisation_vector_size=INIT_VECT_SIZE, AES_key_length=32):
         """
 
         Parameters
@@ -460,7 +462,7 @@ class RSAAESEncryption(AESEncryption):
             return False
         return self.RSAcipher.can_encrypt()
 
-    def generate_key(self, key_size = 2048):
+    def generate_key(self, key_size=2048):
         """
 
         Parameters
@@ -482,7 +484,7 @@ class RSAAESEncryption(AESEncryption):
             self.key = RSA.importKey(keyFile.read())
         self.RSAcipher = PKCS1_OAEP.new(self.key)
 
-    def store_key(self, file_name = 'key.key', public = True):
+    def store_key(self, file_name='key.key', public=True):
         """
 
         Parameters
@@ -501,7 +503,7 @@ class RSAAESEncryption(AESEncryption):
             else:
                 keyfile.write(self.key.publickey().exportKey())
 
-    def generate_AES_key(self, key_size = None):
+    def generate_AES_key(self, key_size=None):
         """
         Generates a new AES key
 
@@ -521,7 +523,8 @@ class RSAAESEncryption(AESEncryption):
             raise ValueError('Bad AES key size')
         return Random.get_random_bytes(key_size)
 
-    def encrypt_file(self, file_name, encrypted_file_name = None, AESkey = None, chunk_size = None, initialisation_vector_size = None):
+    def encrypt_file(self, file_name, encrypted_file_name=None, AESkey=None, 
+					 chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -545,7 +548,7 @@ class RSAAESEncryption(AESEncryption):
         super(RSAAESEncryption, self).encrypt_file(file_name, encrypted_file_name, AESkey, chunk_size, initialisation_vector_size)
         return self.RSAcipher.encrypt(AESkey)
 
-    def encrypt_stream(self, instream, AESkey = None, chunk_size = None, initialisation_vector_size = None):
+    def encrypt_stream(self, instream, AESkey=None, chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -599,7 +602,8 @@ class RSAAESEncryption(AESEncryption):
         """
         return self.RSAcipher.decrypt(ciphertext)
 
-    def decrypt_file(self, file_name, encrypted_AES_key = None, decrypted_file_name = None, chunk_size = None, initialisation_vector_size = None):
+    def decrypt_file(self, file_name, encrypted_AES_key=None, decrypted_file_name=None, 
+					 chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
@@ -624,7 +628,7 @@ class RSAAESEncryption(AESEncryption):
         AESkey = self.RSAcipher.decrypt(encrypted_AES_key)
         super(RSAAESEncryption, self).decrypt_file(file_name, AESkey, decrypted_file_name, chunk_size, initialisation_vector_size)
 
-    def decrypt_stream(self, instream, encrypted_AES_Key = None, chunk_size = None, initialisation_vector_size = None):
+    def decrypt_stream(self, instream, encrypted_AES_Key=None, chunk_size=None, initialisation_vector_size=None):
         """
 
         Parameters
